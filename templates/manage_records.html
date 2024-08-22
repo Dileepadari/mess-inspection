@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Records</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        .h1{
+            margin-top: 100px;
+        }
+        .back {
+            display: inline-block;
+            margin-top: 20px;
+            text-decoration: none;
+            color: #333;
+            background-color: #ddd;
+            padding: 10px 20px;
+            border-radius: 5px;
+        }
+        .container {
+            width: 80%;
+            margin: 20px auto;
+            padding: 20px;
+            background: #fff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 5px;
+        }
+        section {
+            margin-bottom: 20px;
+        }
+        .toggle-section {
+            display: none;
+        }
+        .toggle-section.active {
+            display: block;
+        }
+        button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            width: 30%;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+        }
+        input[type="text"], input[type="date"], input[type="time"], input[type="number"], textarea {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        textarea {
+            resize: vertical;
+            height: 60px;
+        }
+        .manage-btns{
+            display: flex;
+            justify-content: space-between;
+        }
+        h2{
+            margin-top: 20px;
+            text-align: center;
+        }
+        h3{
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <input type="checkbox" id="check">
+        <label for="check" class="checkbtn">
+            <i class="menu-icon">&#8801;</i>
+        </label>
+        <label class="logo">IIITH MESS</label>
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="{{ url_for('about') }}">About</a></li>
+            <li><a href="{{ url_for('checklist') }}">Add Record</a></li>
+            <li><a href="{{ url_for('records') }}" class="active">Records</a></li>
+            <li><a href="{{ url_for('add_fields') }}">Add Fields</a></li>
+            <li><a href="{{ url_for('contact') }}">Contact</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <h1>Manage Records</h1>
+
+        <!-- Buttons to Toggle Sections -->
+        <div class="manage-btns">
+            <button id="view-button">View Record</button>
+            <button id="edit-button">Edit Record</button>
+            <button id="delete-button">Delete Record</button>
+        </div>
+        
+
+        <!-- View Record -->
+        <section id="view-record" class="toggle-section active">
+            <h2>View Record</h2>
+            {% if record %}
+                <h3><strong>Date:</strong> {{ record[1] }}</h3>
+                <h3><strong>Time:</strong> {{ record[2] }}</h3>
+                <h3><strong>Inspector Name:</strong> {{ record[3] }}</h3>
+                <h2>Checklist</h2>
+                <div class="outer-records-table">
+                    <table border="1" class="records-table">
+                        <thead>
+                            <tr>
+                                <th>Field</th>
+                                <th>Value</th>
+                                <th>Comment</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for field in fields %}
+                                <tr>
+                                    <td>{{ field[1] }}</td>
+                                    <td>
+                                        {% if field[2] == 'checkbox' %}
+                                            {% if get_field_value(record[0], field[0]) == 'Verified' %}
+                                                Verified
+                                            {% else %}
+                                                Unverified
+                                            {% endif %}
+                                        {% else %}
+                                            {{ get_field_value(record[0], field[0]) }}
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if get_field_value(record[0], field[0] ~ '_comment') %}
+                                            {{ get_field_value(record[0], field[0] ~ '_comment') }}
+                                        {% else %}
+                                            &mdash;
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p>No record found.</p>
+            {% endif %}
+        </section>
+
+        <!-- Edit Record -->
+        <section id="edit-record" class="toggle-section">
+            <h2>Edit Record</h2>
+            <form method="post" action="{{ url_for('manage_record', record_id=record[0]) }}">
+                <label>Date: <input type="date" name="date" value="{{ record[1] }}"></label><br>
+                <label>Time: <input type="time" name="time" value="{{ record[2] }}"></label><br>
+                <label>Name: <input type="text" name="inspector_name" value="{{ record[3] }}"></label><br>
+
+                {% for field in fields %}
+                    {% if field[2] == 'checkbox' %}
+                        <label>
+                            <input type="checkbox" name="{{ field[0] }}" {% if get_field_value(record[0], field[0]) %}checked{% endif %}>
+                            {{ field[1] }}
+                            <textarea name="{{ field[0] }}_comment" placeholder="Add comment...">{{ get_field_value(record[0], field[0] ~ '_comment') }}</textarea><br>
+                        </label><br>
+                    {% elif field[2] == 'text' %}
+                        <label>
+                            {{ field[1] }}:
+                            <input type="text" name="{{ field[0] }}" value="{{ get_field_value(record[0], field[0]) }}">
+                        </label><br>
+                    {% elif field[2] == 'number' %}
+                        <label>
+                            {{ field[1] }}:
+                            <input type="number" name="{{ field[0] }}" value="{{ get_field_value(record[0], field[0]) }}">
+                        </label><br>
+                    {% endif %}
+                {% endfor %}
+
+                <input type="submit" name="update" value="Update Record">
+            </form>
+        </section>
+
+        <!-- Delete Record -->
+        <section id="delete-record" class="toggle-section">
+            <h2>Delete Record</h2>
+            <form method="post" action="{{ url_for('manage_record', record_id=record[0]) }}">
+                <label>Enter Inspector Name to Confirm: <input type="text" name="inspector_name_confirm" required></label><br>
+                <p>Are you sure you want to delete this record?</p>
+                <input type="submit" name="delete" value="Delete Record">
+            </form>
+        </section>
+
+        <br>
+        <a href="{{ url_for('records') }}" class="back">Back to Records</a>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const viewButton = document.getElementById('view-button');
+            const editButton = document.getElementById('edit-button');
+            const deleteButton = document.getElementById('delete-button');
+
+            const viewSection = document.getElementById('view-record');
+            const editSection = document.getElementById('edit-record');
+            const deleteSection = document.getElementById('delete-record');
+
+            if (viewButton) {
+                viewButton.addEventListener('click', function() {
+                    viewSection.classList.add('active');
+                    editSection.classList.remove('active');
+                    deleteSection.classList.remove('active');
+                });
+            }
+
+            if (editButton) {
+                editButton.addEventListener('click', function() {
+                    viewSection.classList.remove('active');
+                    editSection.classList.add('active');
+                    deleteSection.classList.remove('active');
+                });
+            }
+
+            if (deleteButton) {
+                deleteButton.addEventListener('click', function() {
+                    viewSection.classList.remove('active');
+                    editSection.classList.remove('active');
+                    deleteSection.classList.add('active');
+                });
+            }
+        });
+    </script>
+</body>
+</html>

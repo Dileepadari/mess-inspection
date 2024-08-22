@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body>
+    <nav>
+        <input type="checkbox" id="check">
+        <label for="check" class="checkbtn">
+            <i class="menu-icon">&#8801;</i>
+        </label>
+        <label class="logo">IIITH MESS</label>
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="{{ url_for('about') }}">About</a></li>
+            <li><a href="{{ url_for('checklist') }}">Add Record</a></li>
+            <li><a href="{{ url_for('records') }}">Records</a></li>
+            <li><a href="{{ url_for('add_fields') }}">Add Fields</a></li>
+            <li><a href="{{ url_for('contact') }}" class="active">Contact</a></li>
+        </ul>
+    </nav>
+    <br>
+    <div style="max-width: 90%;text-align: center;display:flex; flex-direction:column; justify-items: center;margin: auto;">
+        <h1>Contact Us</h1>
+        <p>Have a question or feedback for us? We'd love to hear from you!</p>
+        <p>Feel free to reach out to us through the following contact details:</p>
+        <p>Email: <a href="mailto:messcom@iiit.ac.in" style="color: #007bff;">
+            messcom@iiit.ac.in</a></p>
+        <p>Address: Gachibowli, Hyderabad, Telangana, India - 500032</p>
+
+
+    </div>
+</body>
+
+</html>

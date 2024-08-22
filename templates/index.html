@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Date</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <nav>
+        <input type="checkbox" id="check">
+        <label for="check" class="checkbtn">
+            <i class="menu-icon">&#8801;</i>
+        </label>
+        <label class="logo">IIITH MESS</label>
+        <ul>
+            <li><a href="/" class="active">Home</a></li>
+            <li><a href="{{ url_for('about') }}">About</a></li>
+            <li><a href="{{ url_for('checklist') }}">Add Record</a></li>
+            <li><a href="{{ url_for('records') }}">Records</a></li>
+            <li><a href="{{ url_for('add_fields') }}">Add fields    </a></li>
+            <li><a href="{{ url_for('contact') }}">Contact</a></li>
+        </ul>
+    </nav>
+    <br>
+    <h1>Home</h1>
+    <div class="record-btns">
+        <a href="{{ url_for('checklist') }}">Add New Record</a>
+        <a href="{{ url_for('records') }}">View All Records</a><br><br>
+    </div>
+    <h1>Recently Added Records</h1>
+    <div class="outer-records-table">
+        <table border="1" class="records-table">
+            <tr>
+                <th>ID</th>
+                <th>Date</th>
+                <th>Inspector Name</th>
+                <th>Action</th>
+            </tr>
+            {% for record in records %}
+            <tr>
+                <td>{{ record[0] }}</td>
+                <td>{{ record[1] }}</td>
+                <td>{{ record[2] }}</td>
+                <td>
+                    <a href="{{ url_for('manage_record', record_id=record[0]) }}">View/Edit/Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</body>
+</html>

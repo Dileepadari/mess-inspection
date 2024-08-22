@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        /* About Us Section */
+div {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin: 20px auto;
+    max-width: 800px;
+}
+
+h1 {
+    font-size: 28px;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+ol{
+    margin-left: 20px;
+    text-align: justify;
+}
+
+p {
+    line-height: 1.6;
+    margin-bottom: 15px;
+    text-align: justify;
+}
+a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+    </style>
+</head>
+
+<body>
+    <nav>
+        <input type="checkbox" id="check">
+        <label for="check" class="checkbtn">
+            <i class="menu-icon">&#8801;</i>
+        </label>
+        <label class="logo">IIITH MESS</label>
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="{{ url_for('about') }}" class="active">About</a></li>
+            <li><a href="{{ url_for('checklist') }}">Add Record</a></li>
+            <li><a href="{{ url_for('records') }}">Records</a></li>
+            <li><a href="{{ url_for('add_fields') }}">Add Fields</a></li>
+            <li><a href="{{ url_for('contact') }}">Contact</a></li>
+        </ul>
+    </nav>
+    <br>
+    <div style="max-width: 90%; text-align: center; display: flex; flex-direction: column; justify-items: center; margin: auto;">
+        <h1>About Us</h1>
+        <p>Welcome to the IIIT College Mess Weekly Food Safety Checklist page!</p>
+        <p>Our updated system aims to enhance food safety standards in the mess facilities at our institute. We have introduced a new way to manage and review safety records, making the process more efficient and user-friendly.</p>
+        <p>Key features of the updated system include:</p>
+        <ol>
+            <li><strong>Customizable Checklists:</strong> You can now add custom fields to the checklist based on your needs.</li>
+            <li><strong>Category-Based Fields:</strong> Fields are categorized into Personal Hygiene, Cleaning & Sanitization, Food Storage, Cooking & Serving, Pest Control, Equipment Maintenance, and Waste Management.</li>
+            <li><strong>Easy Record Management:</strong> Add, edit, and view records with ease through our intuitive interface.</li>
+        </ol>
+        <p>We are committed to maintaining high food safety standards and improving the process continually. If you have any feedback or suggestions, please reach out to us through the <a href="{{ url_for('contact') }}">Contact</a> page.</p>
+        <p>Thank you for supporting our mission to ensure a safe and healthy dining environment!</p>
+    </div>
+</body>
+
+</html>

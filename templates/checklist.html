@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weekly Food Safety Checklist</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <nav>
+        <input type="checkbox" id="check">
+        <label for="check" class="checkbtn">
+            <i class="menu-icon">&#8801;</i>
+        </label>
+        <label class="logo">IIITH MESS</label>
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="{{ url_for('about') }}">About</a></li>
+            <li><a href="{{ url_for('checklist') }}" class="active">Add Record</a></li>
+            <li><a href="{{ url_for('records') }}">Records</a></li>
+            <li><a href="{{ url_for('add_fields') }}">Add Fields</a></li>
+            <li><a href="{{ url_for('contact') }}">Contact</a></li>
+        </ul>
+    </nav>
+
+    <h1>IIIT College Mess Weekly Food Safety Checklist</h1>
+
+    <form method="post">
+        <!-- Inspector's Details -->
+        <h2>Inspector's Details</h2>
+        <div class="datetime">
+            <label>Date: <input type="date" name="date" value="{{ date }}" readonly></label><br>
+            <label>Time: <input type="time" name="time" value="{{ time }}" readonly></label><br>
+        </div>
+        <label>Name: <input type="text" name="inspector_name" value="{{ record[3] if record else '' }}"></label><br>
+
+        <!-- Dynamic Fields by Category -->
+        {% for category, fields in categories.items() %}
+            <h2>{{ category }}</h2>
+            {% for field in fields %}
+                {% if field[2] == 'checkbox' %}
+                    <label>
+                        <input type="checkbox" name="{{ field[0] }}" {% if get_field_value(checklist_id, field[0]) %}                                                                                                                                                                               {% endif %}>
+                        {{ field[1] }}
+                        <textarea name="{{ field[0] }}_comment" placeholder="Add comment...">{{ get_field_value(checklist_id, field[0]) }}</textarea><br>
+                    </label><br>
+                {% elif field[2] == 'text' %}
+                    <label>
+                        {{ field[1] }}:
+                        <input type="text" name="{{ field[0] }}" value="{{ get_field_value(checklist_id, field[0]) }}">
+                    </label><br>
+                {% elif field[2] == 'number' %}
+                    <label>
+                        {{ field[1] }}:
+                        <input type="number" name="{{ field[0] }}" value="{{ get_field_value(checklist_id, field[0]) }}">
+                    </label><br>
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+
+        <input type="submit" value="Submit">
+    </form>
+
+    <br>
+    <a href="{{ url_for('index') }}" class="back">Back to Home</a>
+</body>
+</html>
