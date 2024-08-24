@@ -53,6 +53,12 @@ def get_fields():
     conn.close()
     return fields
 
+def get_field_by_id(field_id):
+    conn = get_db()
+    field = conn.execute('SELECT * FROM fields WHERE id = ?', (field_id,)).fetchone()
+    conn.close()
+    return field
+
 
 def update_record_in_db(record_id, form_data):
     conn = get_db()
@@ -192,8 +198,39 @@ def add_fields():
         conn.close()
         flash('Field added successfully!', 'success')
         return redirect(url_for('add_fields'))
-    
-    return render_template('add_fields.html')
+    # get the existing fields
+    fields = get_fields()
+    return render_template('add_fields.html', fields=fields)
+
+
+@app.route('/edit_field/<int:field_id>', methods=['GET', 'POST'])
+def edit_field(field_id):
+    field = get_field_by_id(field_id)
+    if request.method == 'POST':
+        name = request.form['name']
+        field_type = request.form['type']
+        category = request.form['category']
+
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute('UPDATE fields SET name = ?, field_type = ?, category = ? WHERE id = ?', (name, field_type, category, field_id))
+        conn.commit()
+        conn.close()
+        flash('Field updated successfully!', 'success')
+        return redirect(url_for('add_fields'))
+    return render_template('edit_field.html', field=field)
+
+@app.route('/delete_field/<int:field_id>', methods=['GET','POST'])
+def delete_field(field_id):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute('DELETE FROM checklist_fields WHERE field_id = ?', (field_id,))
+    cursor.execute('DELETE FROM fields WHERE id = ?', (field_id,))
+    conn.commit()
+    conn.close()
+    flash('Field deleted successfully!', 'success')
+    return redirect(url_for('add_fields'))
+
 
 @app.route('/about')
 def about():

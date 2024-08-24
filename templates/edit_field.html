@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Field</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        .container {
+            width: 80%;
+            margin: 20px auto;
+            padding: 20px;
+            background: #fff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 5px;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], select {
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            width: 100%;
+        }
+        input[type="submit"] {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            width: 100%;
+        }
+        .back {
+            display: inline-block;
+            margin-top: 20px;
+            text-decoration: none;
+            color: #333;
+            background-color: #ddd;
+            padding: 10px 20px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <input type="checkbox" id="check">
+        <label for="check" class="checkbtn">
+            <i class="menu-icon">&#8801;</i>
+        </label>
+        <label class="logo">IIITH MESS</label>
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="{{ url_for('about') }}">About</a></li>
+            <li><a href="{{ url_for('checklist') }}">Add Record</a></li>
+            <li><a href="{{ url_for('records') }}">Records</a></li>
+            <li><a href="{{ url_for('add_fields') }}">Add Fields</a></li>
+            <li><a href="{{ url_for('contact') }}">Contact</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <h1>Edit Field</h1>
+        <form method="post">
+            <label for="name">Field Name:</label>
+            <input type="text" name="name" value="{{ field[1] }}" required>
+            
+            <label for="type">Field Type:</label>
+            <select name="type" required>
+                <option value="checkbox" {% if field[2] == 'checkbox' %}selected{% endif %}>Checkbox</option>
+            </select>
+            
+            <label for="category">Category:</label>
+            <select name="category" required>
+                <option value="Personal Hygiene" {% if field[4] == 'Personal Hygiene' %}selected{% endif %}>Personal Hygiene</option>
+                <option value="Cleaning & Sanitization" {% if field[4] == 'Cleaning & Sanitization' %}selected{% endif %}>Cleaning & Sanitization</option>
+                <option value="Food Storage" {% if field[4] == 'Food Storage' %}selected{% endif %}>Food Storage</option>
+                <option value="Cooking & Serving" {% if field[4] == 'Cooking & Serving' %}selected{% endif %}>Cooking & Serving</option>
+                <option value="Pest Control" {% if field[4] == 'Pest Control' %}selected{% endif %}>Pest Control</option>
+                <option value="Equipment Maintenance" {% if field[4] == 'Equipment Maintenance' %}selected{% endif %}>Equipment Maintenance</option>
+                <option value="Waste Management" {% if field[4] == 'Waste Management' %}selected{% endif %}>Waste Management</option>
+            </select>
+            
+            <input type="submit" name="submit" value="Update Field">
+        </form>
+        <a href="{{ url_for('add_fields') }}" class="back">Back to Manage Fields</a>
+    </div>
+</body>
+</html>

@@ -1,11 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Fields</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        .container {
+            width: 80%;
+            margin: 20px auto;
+            padding: 20px;
+            background: #fff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            width: 30%;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .btn-group {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .toggle-section {
+            display: none;
+        }
+        .toggle-section.active {
+            display: block;
+        }
+        .back {
+            display: inline-block;
+            margin-top: 20px;
+            text-decoration: none;
+            color: #333;
+            background-color: #ddd;
+            padding: 10px 20px;
+            border-radius: 5px;
+        }
+    </style>
 </head>
 
 <body>
@@ -24,34 +79,96 @@
             <li><a href="{{ url_for('contact') }}">Contact</a></li>
         </ul>
     </nav>
-    <br>
-    <h1>Add New Field</h1>
-    <form method="post">
-        <label for="name">Field Name:</label>
-        <input type="text" name="name" required>
-        <br>
-        <label for="type">Field Type:</label>
-        <select name="type" required>
-            <!-- <option value="text">Text</option> -->
-            <option value="checkbox">Checkbox</option>
-            <!-- <option value="number">Number</option> -->
-        </select>
-        <br>
-        <label for="category">Category:</label>
-        <select name="category" required>
-            <option value="Personal Hygiene">Personal Hygiene</option>
-            <option value="Cleaning & Sanitization">Cleaning & Sanitization</option>
-            <option value="Food Storage">Food Storage</option>
-            <option value="Cooking & Serving">Cooking & Serving</option>
-            <option value="Pest Control">Pest Control</option>
-            <option value="Equipment Maintenance">Equipment Maintenance</option>
-            <option value="Waste Management">Waste Management</option>
-        </select>
-        <br>
-        <input type="submit" name="submit" value="Add Field"></input>
-    </form>
-    <br>
-    <a href="{{ url_for('index') }}" class="back">Back to Home</a>
-</body>
 
+    <div class="container">
+        <h1>Manage Fields</h1>
+
+        <!-- Buttons to Toggle Sections -->
+        <div class="btn-group">
+            <button id="add-field-button">Add New Field</button>
+            <button id="view-fields-button">View Available Fields</button>
+        </div>
+
+        <!-- Add New Field Section -->
+        <section id="add-field-section" class="toggle-section active">
+            <h2>Add New Field</h2>
+            <form method="post">
+                <label for="name">Field Name:</label>
+                <input type="text" name="name" required>
+                <br>
+                <label for="type">Field Type:</label>
+                <select name="type" required>
+                    <option value="checkbox">Checkbox</option>
+                </select>
+                <br>
+                <label for="category">Category:</label>
+                <select name="category" required>
+                    <option value="Personal Hygiene">Personal Hygiene</option>
+                    <option value="Cleaning & Sanitization">Cleaning & Sanitization</option>
+                    <option value="Food Storage">Food Storage</option>
+                    <option value="Cooking & Serving">Cooking & Serving</option>
+                    <option value="Pest Control">Pest Control</option>
+                    <option value="Equipment Maintenance">Equipment Maintenance</option>
+                    <option value="Waste Management">Waste Management</option>
+                </select>
+                <br>
+                <input type="submit" name="submit" value="Add Field"></input>
+            </form>
+        </section>
+
+        <!-- View Available Fields Section -->
+        <section id="view-fields-section" class="toggle-section">
+            <h2>Available Fields</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Field Name</th>
+                        <th>Field Type</th>
+                        <th>Category</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for field in fields %}
+                    <tr>
+                        <td>{{ field[1] }}</td>
+                        <td>{{ field[2] }}</td>
+                        <td>{{ field[3] }}</td>
+                        <td>
+                            <a href="{{ url_for('edit_field', field_id=field[0]) }}">Edit</a> |
+                            <a href="{{ url_for('delete_field', field_id=field[0]) }}" onclick="return confirm('Are you sure you want to delete this field?');">Delete</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+
+        <a href="{{ url_for('index') }}" class="back">Back to Home</a>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const addFieldButton = document.getElementById('add-field-button');
+            const viewFieldsButton = document.getElementById('view-fields-button');
+
+            const addFieldSection = document.getElementById('add-field-section');
+            const viewFieldsSection = document.getElementById('view-fields-section');
+
+            if (addFieldButton) {
+                addFieldButton.addEventListener('click', function() {
+                    addFieldSection.classList.add('active');
+                    viewFieldsSection.classList.remove('active');
+                });
+            }
+
+            if (viewFieldsButton) {
+                viewFieldsButton.addEventListener('click', function() {
+                    addFieldSection.classList.remove('active');
+                    viewFieldsSection.classList.add('active');
+                });
+            }
+        });
+    </script>
+</body>
 </html>
