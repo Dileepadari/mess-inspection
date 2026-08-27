@@ -1,0 +1,67 @@
+{% macro score_badge(percent) -%}
+    {%- if percent is none -%}
+        <span class="badge">n/a</span>
+    {%- else -%}
+        <span class="badge {{ 'badge-ok' if percent >= 80 else 'badge-warn' if percent >= 50 else 'badge-danger' }}">{{ percent }}%</span>
+    {%- endif -%}
+{%- endmacro %}
+
+{% macro meter(percent) -%}
+    {%- set p = percent if percent is not none else 0 -%}
+    <div class="meter {{ 'meter-ok' if p >= 80 else 'meter-warn' if p >= 50 else 'meter-danger' }}">
+        <span style="width: {{ p }}%"></span>
+    </div>
+{%- endmacro %}
+
+{% macro empty_state(icon, title, body, href=None, label=None) -%}
+    <div class="empty">
+        <span class="empty-icon" aria-hidden="true">{{ icon }}</span>
+        <h3>{{ title }}</h3>
+        <p>{{ body }}</p>
+        {% if href %}<a class="btn" href="{{ href }}">{{ label }}</a>{% endif %}
+    </div>
+{%- endmacro %}
+
+{% macro records_table(records, scores) -%}
+    <div class="table-wrap">
+        <table class="table-stack">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Inspector</th>
+                    <th>Score</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in records %}
+                    {% set score = scores.get(record['id']) %}
+                    <tr>
+                        <td data-label="#" class="num">{{ record['id'] }}</td>
+                        <td data-label="Date">{{ record['date'] | pretty_date }}</td>
+                        <td data-label="Time" class="num">{{ record['time'] | pretty_time }}</td>
+                        <td data-label="Inspector">{{ record['inspector_name'] }}</td>
+                        <td data-label="Score">
+                            <span class="cell-value">
+                                {{ score_badge(score[2] if score else none) }}
+                                {% if score and score[1] %}
+                                    <span class="small muted">{{ score[0] }}/{{ score[1] }}</span>
+                                {% endif %}
+                            </span>
+                        </td>
+                        <td data-label="Actions">
+                            <div class="row-actions">
+                                <a class="btn btn-sm btn-secondary"
+                                   href="{{ url_for('records.detail', record_id=record['id']) }}">View</a>
+                                <a class="btn btn-sm btn-ghost"
+                                   href="{{ url_for('records.detail', record_id=record['id'], tab='edit') }}">Edit</a>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{%- endmacro %}

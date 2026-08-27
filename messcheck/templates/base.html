@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Food safety inspection checklists for the {{ org_name }}.">
+    <meta name="theme-color" content="#47266B">
+    <title>{% block title %}{{ app_name }}{% endblock %} · {{ app_name }}</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo-mark.png') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script>
+        // Set the theme before first paint so the page never flashes the wrong one.
+        try {
+            var saved = localStorage.getItem('messcheck-theme');
+            if (saved) { document.documentElement.dataset.theme = saved; }
+        } catch (e) {}
+    </script>
+</head>
+<body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-header">
+        <div class="header-inner">
+            <a class="brand" href="{{ url_for('pages.index') }}">
+                <span class="brand-badge">
+                    <img class="logo-mono" src="{{ url_for('static', filename='logo-mark.png') }}" alt="">
+                </span>
+                <span class="brand-text">
+                    <strong>{{ app_name }}</strong>
+                    <small>{{ org_name }}</small>
+                </span>
+            </a>
+
+            <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav"
+                    aria-label="Open menu">
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+                <span class="nav-toggle-bar"></span>
+            </button>
+
+            <nav class="site-nav" id="site-nav" aria-label="Main">
+                <ul>
+                    {% set nav_items = [
+                        ('pages.index',   'Home',      url_for('pages.index')),
+                        ('records.new',   'New Check', url_for('records.new')),
+                        ('records.index', 'Records',   url_for('records.index')),
+                        ('fields.index',  'Fields',    url_for('fields.index')),
+                        ('pages.about',   'About',     url_for('pages.about')),
+                        ('pages.contact', 'Contact',   url_for('pages.contact'))
+                    ] %}
+                    {% for endpoint, label, href in nav_items %}
+                        {% set active = request.endpoint == endpoint
+                            or (endpoint == 'records.index' and request.endpoint in ['records.detail'])
+                            or (endpoint == 'fields.index' and request.endpoint in ['fields.edit']) %}
+                        <li>
+                            <a href="{{ href }}" class="{{ 'active' if active }}"
+                               {{ 'aria-current=page' if active }}>{{ label }}</a>
+                        </li>
+                    {% endfor %}
+                    <li class="nav-theme">
+                        <button class="theme-toggle" type="button" aria-label="Switch colour theme">
+                            <span class="theme-icon-light" aria-hidden="true">&#9788;</span>
+                            <span class="theme-icon-dark" aria-hidden="true">&#9789;</span>
+                            <span class="theme-label">Theme</span>
+                        </button>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <div class="nav-backdrop" hidden></div>
+
+    <main id="main" class="page">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flashes" role="status" aria-live="polite">
+                    {% for category, message in messages %}
+                        <div class="flash flash-{{ category }}">
+                            <span class="flash-text">{{ message }}</span>
+                            <button type="button" class="flash-close" aria-label="Dismiss">&times;</button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <p>{{ app_name }} · {{ org_name }} food safety checklists</p>
+        <p class="footer-links">
+            <a href="{{ url_for('pages.about') }}">About</a>
+            <a href="{{ url_for('pages.contact') }}">Contact</a>
+            <span>&copy; {{ current_year }}</span>
+        </p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

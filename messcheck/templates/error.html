@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}{{ code }}{% endblock %}
+
+{% block content %}
+<div class="error-page">
+    <div class="error-code">{{ code }}</div>
+    <h1>{{ message }}</h1>
+    <p class="muted">Check the address, or head back and try again from the home page.</p>
+    <div class="hero-actions" style="justify-content: center;">
+        <a class="btn" href="{{ url_for('pages.index') }}">Go home</a>
+        <a class="btn btn-secondary" href="{{ url_for('records.index') }}">View records</a>
+    </div>
+</div>
+{% endblock %}

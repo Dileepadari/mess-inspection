@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% from "_macros.html" import empty_state, records_table %}
+{% block title %}Records{% endblock %}
+
+{% block content %}
+<div class="page-head">
+    <div>
+        <h1>Records</h1>
+        <p>{{ records | length }} record{{ '' if records | length == 1 else 's' }}{{ ' matching your filters' if filtered }}.</p>
+    </div>
+    <div class="page-head-actions">
+        <a class="btn btn-secondary"
+           href="{{ url_for('records.export_all', q=search, **{'from': date_from, 'to': date_to}) }}">Export CSV</a>
+        <a class="btn" href="{{ url_for('records.new') }}">New check</a>
+    </div>
+</div>
+
+<div class="card">
+    <form class="filters" method="get" action="{{ url_for('records.index') }}">
+        <div class="field">
+            <label for="q">Inspector</label>
+            <input type="search" id="q" name="q" value="{{ search }}" placeholder="Search by name">
+        </div>
+        <div class="field">
+            <label for="from">From</label>
+            <input type="date" id="from" name="from" value="{{ date_from }}">
+        </div>
+        <div class="field">
+            <label for="to">To</label>
+            <input type="date" id="to" name="to" value="{{ date_to }}">
+        </div>
+        <div class="filters-actions">
+            <button class="btn" type="submit">Filter</button>
+            {% if filtered %}
+                <a class="btn btn-secondary" href="{{ url_for('records.index') }}">Clear</a>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+<div class="card">
+    {% if records %}
+        {{ records_table(records, scores) }}
+    {% elif filtered %}
+        {{ empty_state('&#128269;' | safe, 'No matches',
+                       'No records match those filters. Try widening the date range.',
+                       url_for('records.index'), 'Clear filters') }}
+    {% else %}
+        {{ empty_state('&#128203;' | safe, 'No records yet',
+                       'Submit your first checklist and it will show up here.',
+                       url_for('records.new'), 'Start a new check') }}
+    {% endif %}
+</div>
+{% endblock %}

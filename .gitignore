@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+env/
+
+# Local database (created on first run by `flask --app app init-db`)
+checklist.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+logs/
+
+# Editor and OS cruft
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Merge and patch leftovers
+*.orig
+*.rej
+*.bak
+
+# Secrets: match the shape, not the name
+.env
+*.env
+!.env.example

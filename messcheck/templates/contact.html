@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Contact{% endblock %}
+
+{% block content %}
+<div class="page-head">
+    <div>
+        <h1>Contact</h1>
+        <p>Questions about an inspection, or something to report between visits.</p>
+    </div>
+</div>
+
+<div class="grid grid-2">
+    <div class="card">
+        <div class="card-head"><h2>Mess committee</h2></div>
+        <ul class="contact-list">
+            <li>
+                <div>
+                    <span class="k">Email</span>
+                    <a href="mailto:messcom@iiit.ac.in">messcom@iiit.ac.in</a>
+                </div>
+            </li>
+            <li>
+                <div>
+                    <span class="k">Address</span>
+                    IIIT Hyderabad, Gachibowli,<br>Hyderabad, Telangana 500032, India
+                </div>
+            </li>
+            <li>
+                <div>
+                    <span class="k">Response time</span>
+                    Within two working days
+                </div>
+            </li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <div class="card-head"><h2>Reporting an issue</h2></div>
+        <p>If you have spotted something urgent, do not wait for the weekly check.
+           Email the committee with the date, the location in the mess, and a photograph
+           if you have one.</p>
+        <p>For anything found during an inspection, record it as a comment on the relevant
+           field so it stays attached to that visit.</p>
+        <a class="btn" href="{{ url_for('records.new') }}">Start a new check</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}About{% endblock %}
+
+{% block content %}
+<div class="page-head">
+    <div>
+        <h1>About {{ app_name }}</h1>
+        <p>Why this exists and how a weekly check works.</p>
+    </div>
+    <div class="page-head-actions">
+        <a class="btn" href="{{ url_for('records.new') }}">Start a new check</a>
+    </div>
+</div>
+
+<div class="card">
+    <p class="lead">{{ app_name }} is the food safety checklist used for the {{ org_name }}
+       facilities. It replaces the paper form that used to circulate between inspectors, so
+       every visit is recorded in one place and can be compared with the previous one.</p>
+</div>
+
+<div class="card">
+    <div class="card-head"><h2>How a check works</h2></div>
+    <ol class="steps">
+        <li>
+            <span class="step-n">1</span>
+            <div>
+                <h3>Open the form</h3>
+                <p>Go to <a href="{{ url_for('records.new') }}">New check</a> and confirm the
+                   date, time and your name.</p>
+            </div>
+        </li>
+        <li>
+            <span class="step-n">2</span>
+            <div>
+                <h3>Walk the categories</h3>
+                <p>Tick what you verified and leave a comment on anything that needs
+                   follow-up.</p>
+            </div>
+        </li>
+        <li>
+            <span class="step-n">3</span>
+            <div>
+                <h3>Submit</h3>
+                <p>The record is saved with a compliance score: the share of checkbox items
+                   you were able to verify.</p>
+            </div>
+        </li>
+        <li>
+            <span class="step-n">4</span>
+            <div>
+                <h3>Revisit or export</h3>
+                <p>Anyone can reopen the record later to correct it, or export it as CSV for
+                   a report.</p>
+            </div>
+        </li>
+    </ol>
+</div>
+
+<div class="grid grid-2">
+    <div class="card">
+        <div class="card-head"><h2>The checklist is not fixed</h2></div>
+        <p>The questions live in <a href="{{ url_for('fields.index') }}">Fields</a>. Add a field
+           when a new risk needs watching, reorder them so the form follows your walking route,
+           or retire one that no longer applies.</p>
+        <p>Changes apply to the next inspection. Records already saved keep the answers they
+           were given.</p>
+    </div>
+
+    <div class="card">
+        <div class="card-head"><h2>What the score means</h2></div>
+        <p>The score counts only checkbox items. A field asking for a temperature or a date is
+           recorded but not scored, because there is no single correct answer to count.</p>
+        <ul class="score-key">
+            <li><span class="badge badge-ok">80% and above</span> on track</li>
+            <li><span class="badge badge-warn">50% to 79%</span> worth a conversation with the mess manager</li>
+            <li><span class="badge badge-danger">below 50%</span> flagged in red across the app</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <div class="card-head"><h2>Who can use it</h2></div>
+        <p>There are no accounts. Anyone who can reach the site can record a check, edit a
+           record, or change the field list, so it is meant for an internal network or a
+           trusted group.</p>
+        <p>Deleting a record asks you to retype the inspector's name first, which is the one
+           guard against an accidental click.</p>
+    </div>
+
+    <div class="card">
+        <div class="card-head"><h2>Questions</h2></div>
+        <p>Reach the mess committee through the
+           <a href="{{ url_for('pages.contact') }}">contact page</a>. For anything urgent found
+           between visits, email rather than waiting for the next weekly check.</p>
+        <a class="btn btn-secondary" href="{{ url_for('pages.contact') }}">Contact the committee</a>
+    </div>
+</div>
+{% endblock %}

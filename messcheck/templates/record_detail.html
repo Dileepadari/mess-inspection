@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+{% from "_macros.html" import score_badge, meter %}
+{% block title %}Record #{{ record['id'] }}{% endblock %}
+
+{% block content %}
+<div class="page-head">
+    <div>
+        <h1>Record #{{ record['id'] }}</h1>
+        <p>{{ record['date'] | pretty_date }} at {{ record['time'] | pretty_time }} · inspected by {{ record['inspector_name'] }}</p>
+    </div>
+    <div class="page-head-actions">
+        <a class="btn btn-secondary" href="{{ url_for('records.export_one', record_id=record['id']) }}">Export CSV</a>
+        <a class="btn btn-secondary" href="{{ url_for('records.index') }}">All records</a>
+    </div>
+</div>
+
+<div class="tabs" role="tablist" data-tabs="{{ tab }}">
+    <button class="tab" type="button" role="tab" data-tab="view" id="tab-view"
+            aria-controls="panel-view" aria-selected="true">View</button>
+    <button class="tab" type="button" role="tab" data-tab="edit" id="tab-edit"
+            aria-controls="panel-edit" aria-selected="false">Edit</button>
+    <button class="tab" type="button" role="tab" data-tab="delete" id="tab-delete"
+            aria-controls="panel-delete" aria-selected="false">Delete</button>
+</div>
+
+<!-- View ---------------------------------------------------------------- -->
+<section class="tab-panel" id="panel-view" role="tabpanel" aria-labelledby="tab-view">
+    <div class="card">
+        <div class="card-head">
+            <h2>Summary</h2>
+            {{ score_badge(percent) }}
+        </div>
+        <dl class="dl">
+            <div><dt>Date</dt><dd>{{ record['date'] | pretty_date }}</dd></div>
+            <div><dt>Time</dt><dd>{{ record['time'] | pretty_time }}</dd></div>
+            <div><dt>Inspector</dt><dd>{{ record['inspector_name'] }}</dd></div>
+            <div><dt>Verified</dt><dd>{{ checked }} of {{ total }} checks</dd></div>
+        </dl>
+        {{ meter(percent) }}
+        {% if record['notes'] %}
+            <div style="margin-top: 18px;">
+                <dt class="stat-label">General notes</dt>
+                <p style="margin-top: 6px;">{{ record['notes'] }}</p>
+            </div>
+        {% endif %}
+    </div>
+
+    {% for category, category_fields in categories.items() %}
+        <div class="card">
+            <div class="card-head"><h2>{{ category }}</h2></div>
+            <div class="table-wrap">
+                <table class="table-stack">
+                    <thead>
+                        <tr><th>Field</th><th>Value</th><th>Comment</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for field in category_fields %}
+                            {% set entry = values.get(field['id'], {}) %}
+                            {% set raw = (entry.get('value') or '') %}
+                            <tr>
+                                <td data-label="Field">{{ field['name'] }}</td>
+                                <td data-label="Value">
+                                    {% if field['field_type'] == 'checkbox' %}
+                                        {% if raw | lower in ['yes', 'on', '1', 'true'] %}
+                                            <span class="badge badge-ok">Verified</span>
+                                        {% else %}
+                                            <span class="badge badge-danger">Not verified</span>
+                                        {% endif %}
+                                    {% elif raw %}
+                                        {{ raw }}
+                                    {% else %}
+                                        <span class="muted">&mdash;</span>
+                                    {% endif %}
+                                </td>
+                                <td data-label="Comment">
+                                    {% if entry.get('comment') %}{{ entry['comment'] }}
+                                    {% else %}<span class="muted">&mdash;</span>{% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endfor %}
+</section>
+
+<!-- Edit ---------------------------------------------------------------- -->
+<section class="tab-panel" id="panel-edit" role="tabpanel" aria-labelledby="tab-edit" hidden>
+    <form method="post" action="{{ url_for('records.detail', record_id=record['id']) }}" novalidate>
+        <div class="card">
+            <div class="card-head"><h2>Inspection details</h2></div>
+            <div class="form-row">
+                <div class="field">
+                    <label for="e-date">Date</label>
+                    <input type="date" id="e-date" name="date" value="{{ record['date'] }}" required>
+                </div>
+                <div class="field">
+                    <label for="e-time">Time</label>
+                    <input type="time" id="e-time" name="time" value="{{ record['time'] }}" required>
+                </div>
+                <div class="field">
+                    <label for="e-name">Inspector name</label>
+                    <input type="text" id="e-name" name="inspector_name"
+                           value="{{ record['inspector_name'] }}" required>
+                </div>
+            </div>
+            <div class="field">
+                <label for="e-notes">General notes</label>
+                <textarea id="e-notes" name="notes">{{ record['notes'] }}</textarea>
+            </div>
+        </div>
+
+        {% for category, category_fields in categories.items() %}
+            <div class="category">
+                <button class="category-head" type="button" aria-expanded="true"
+                        aria-controls="ecat-{{ loop.index }}">
+                    <span>{{ category }} <span class="badge">{{ category_fields | length }}</span></span>
+                    <span class="chev" aria-hidden="true">&#9662;</span>
+                </button>
+                <div class="category-body" id="ecat-{{ loop.index }}">
+                    {% for field in category_fields %}
+                        {% set entry = values.get(field['id'], {}) %}
+                        <div class="check-item">
+                            {% if field['field_type'] == 'checkbox' %}
+                                <div class="check-row">
+                                    <input type="checkbox" id="ef{{ field['id'] }}" name="{{ field['id'] }}"
+                                           {% if (entry.get('value') or '') | lower in ['yes', 'on', '1', 'true'] %}checked{% endif %}>
+                                    <label class="check-label" for="ef{{ field['id'] }}">{{ field['name'] }}</label>
+                                </div>
+                            {% else %}
+                                <label class="check-label" for="ef{{ field['id'] }}">{{ field['name'] }}</label>
+                                <div class="check-input">
+                                    <input type="{{ 'number' if field['field_type'] == 'number' else 'text' }}"
+                                           id="ef{{ field['id'] }}" name="{{ field['id'] }}"
+                                           {% if field['field_type'] == 'number' %}step="any"{% endif %}
+                                           value="{{ entry.get('value', '') }}">
+                                </div>
+                            {% endif %}
+                            <div class="check-comment">
+                                <label class="hint" for="ec{{ field['id'] }}">Comment</label>
+                                <textarea id="ec{{ field['id'] }}" name="{{ field['id'] }}_comment"
+                                          placeholder="Add a comment...">{{ entry.get('comment', '') }}</textarea>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+
+        <div class="sticky-actions">
+            <span class="small muted">Changes are saved to record #{{ record['id'] }}.</span>
+            <div class="actions">
+                <a class="btn btn-secondary" href="{{ url_for('records.detail', record_id=record['id']) }}">Discard</a>
+                <button class="btn" type="submit" name="update" value="1">Save changes</button>
+            </div>
+        </div>
+    </form>
+</section>
+
+<!-- Delete -------------------------------------------------------------- -->
+<section class="tab-panel" id="panel-delete" role="tabpanel" aria-labelledby="tab-delete" hidden>
+    <div class="card">
+        <div class="card-head"><h2>Delete this record</h2></div>
+        <p>This removes record #{{ record['id'] }} and all {{ total }} saved answers. It cannot be undone.</p>
+        <form method="post" action="{{ url_for('records.detail', record_id=record['id']) }}"
+              data-confirm-name="{{ record['inspector_name'] }}">
+            <div class="field" style="max-width: 380px;">
+                <label for="confirm">Type the inspector name to confirm
+                    <span class="hint">Expected: {{ record['inspector_name'] }}</span>
+                </label>
+                <input type="text" id="confirm" name="inspector_name_confirm" autocomplete="off" required>
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-danger" type="submit" name="delete" value="1">Delete record</button>
+                <a class="btn btn-secondary" href="{{ url_for('records.detail', record_id=record['id']) }}">Cancel</a>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% from "_macros.html" import empty_state %}
+{% block title %}Fields{% endblock %}
+
+{% block content %}
+<div class="page-head">
+    <div>
+        <h1>Checklist fields</h1>
+        <p>{{ total }} field{{ '' if total == 1 else 's' }} across {{ grouped | length }} categor{{ 'y' if grouped | length == 1 else 'ies' }}. Every inspection form is built from these.</p>
+    </div>
+    <div class="page-head-actions">
+        <a class="btn btn-secondary" href="{{ url_for('records.new') }}">Preview checklist</a>
+    </div>
+</div>
+
+<div class="tabs" role="tablist" data-tabs="{{ tab }}">
+    <button class="tab" type="button" role="tab" data-tab="add" id="tab-add"
+            aria-controls="panel-add" aria-selected="true">Add a field</button>
+    <button class="tab" type="button" role="tab" data-tab="list" id="tab-list"
+            aria-controls="panel-list" aria-selected="false">Existing fields</button>
+</div>
+
+<section class="tab-panel" id="panel-add" role="tabpanel" aria-labelledby="tab-add">
+    <div class="grid grid-2">
+        <div class="card">
+            <div class="card-head"><h2>New field</h2></div>
+            <form method="post" action="{{ url_for('fields.index') }}" novalidate>
+                <div class="field">
+                    <label for="name">Field name
+                        <span class="hint">What the inspector reads on the form.</span>
+                    </label>
+                    <input type="text" id="name" name="name" value="{{ form.get('name', '') }}"
+                           placeholder="e.g. Serving counters covered and clean" required>
+                </div>
+                <div class="form-row">
+                    <div class="field">
+                        <label for="type">Field type</label>
+                        <select id="type" name="type" required>
+                            {% for value, label in field_types %}
+                                <option value="{{ value }}" {% if form.get('type') == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="category">Category
+                            <span class="hint">Pick one or type a new one.</span>
+                        </label>
+                        <input type="text" id="category" name="category" list="category-options"
+                               value="{{ form.get('category', '') }}" placeholder="Personal Hygiene" required>
+                        <datalist id="category-options">
+                            {% for category in categories %}<option value="{{ category }}"></option>{% endfor %}
+                        </datalist>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button class="btn" type="submit">Add field</button>
+                    <a class="btn btn-secondary" href="{{ url_for('pages.index') }}">Back to home</a>
+                </div>
+            </form>
+        </div>
+
+        <div class="card">
+            <div class="card-head"><h2>Choosing a field type</h2></div>
+            <ul class="type-key">
+                <li>
+                    <span class="badge badge-accent">checkbox</span>
+                    <div>
+                        <strong>Verified or not verified.</strong>
+                        Only these count towards a record's compliance score. Use them for
+                        anything an inspector can confirm at a glance.
+                    </div>
+                </li>
+                <li>
+                    <span class="badge badge-accent">text</span>
+                    <div>
+                        <strong>A short written answer.</strong>
+                        Good for a supplier name or the date of the last pest control visit.
+                        Recorded, but not scored.
+                    </div>
+                </li>
+                <li>
+                    <span class="badge badge-accent">number</span>
+                    <div>
+                        <strong>A measurement.</strong>
+                        A fridge temperature, a bin count. Recorded, but not scored.
+                    </div>
+                </li>
+            </ul>
+            <p class="small muted" style="margin-top: 16px;">Every field carries a comment box on
+               the form, whatever its type, so an inspector can always add context.</p>
+            <p class="small muted">Categories group the form into sections. Typing a category
+               that does not exist yet creates it.</p>
+        </div>
+    </div>
+</section>
+
+<section class="tab-panel" id="panel-list" role="tabpanel" aria-labelledby="tab-list" hidden>
+    {% if grouped %}
+        {% for category, category_fields in grouped.items() %}
+            <div class="card">
+                <div class="card-head">
+                    <h2>{{ category }}</h2>
+                    <span class="badge badge-accent">{{ category_fields | length }} field{{ '' if category_fields | length == 1 else 's' }}</span>
+                </div>
+                <div class="table-wrap">
+                    <table class="table-stack">
+                        <thead>
+                            <tr><th>Field</th><th>Type</th><th>Order</th><th>Actions</th></tr>
+                        </thead>
+                        <tbody>
+                            {% for field in category_fields %}
+                                <tr>
+                                    <td data-label="Field">{{ field['name'] }}</td>
+                                    <td data-label="Type"><span class="badge">{{ field['field_type'] }}</span></td>
+                                    <td data-label="Order">
+                                        <div class="row-actions">
+                                            <form method="post" action="{{ url_for('fields.move', field_id=field['id']) }}">
+                                                <input type="hidden" name="direction" value="up">
+                                                <button class="btn btn-sm btn-ghost" type="submit"
+                                                        aria-label="Move {{ field['name'] }} up"
+                                                        {{ 'disabled' if loop.first }}>&#9650;</button>
+                                            </form>
+                                            <form method="post" action="{{ url_for('fields.move', field_id=field['id']) }}">
+                                                <input type="hidden" name="direction" value="down">
+                                                <button class="btn btn-sm btn-ghost" type="submit"
+                                                        aria-label="Move {{ field['name'] }} down"
+                                                        {{ 'disabled' if loop.last }}>&#9660;</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                    <td data-label="Actions">
+                                        <div class="row-actions">
+                                            <a class="btn btn-sm btn-secondary"
+                                               href="{{ url_for('fields.edit', field_id=field['id']) }}">Edit</a>
+                                            <form method="post" action="{{ url_for('fields.delete', field_id=field['id']) }}"
+                                                  onsubmit="return confirm('Delete &quot;{{ field['name'] }}&quot;? Saved answers for this field are removed too.');">
+                                                <button class="btn btn-sm btn-ghost" type="submit"
+                                                        style="color: var(--danger);">Delete</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="card">
+            {{ empty_state('&#9881;' | safe, 'No fields yet',
+                           'Add your first checklist field using the tab above.') }}
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

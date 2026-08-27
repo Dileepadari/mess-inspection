@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% from "_macros.html" import empty_state %}
+{% block title %}New check{% endblock %}
+
+{% block content %}
+<div class="page-head">
+    <div>
+        <h1>New inspection</h1>
+        <p>Tick what you verified, and add a comment wherever something needs follow-up.</p>
+    </div>
+    <div class="page-head-actions">
+        <a class="btn btn-secondary" href="{{ url_for('records.index') }}">Cancel</a>
+    </div>
+</div>
+
+{% if not categories %}
+    <div class="card">
+        {{ empty_state('&#9881;' | safe, 'No checklist fields yet',
+                       'Add the questions you want inspectors to answer, then come back here.',
+                       url_for('fields.index'), 'Manage fields') }}
+    </div>
+{% else %}
+<form method="post" novalidate>
+    <div class="card">
+        <div class="card-head"><h2>Inspection details</h2></div>
+        <div class="form-row">
+            <div class="field">
+                <label for="date">Date</label>
+                <input type="date" id="date" name="date" value="{{ date }}" required>
+            </div>
+            <div class="field">
+                <label for="time">Time</label>
+                <input type="time" id="time" name="time" value="{{ time }}" required>
+            </div>
+            <div class="field">
+                <label for="inspector_name">Inspector name</label>
+                <input type="text" id="inspector_name" name="inspector_name"
+                       value="{{ inspector_name }}" placeholder="Your name" required>
+            </div>
+        </div>
+        <div class="field">
+            <label for="notes">General notes <span class="hint">Optional. Anything that does not fit a single field.</span></label>
+            <textarea id="notes" name="notes" placeholder="Overall observations, actions agreed with the mess manager...">{{ notes }}</textarea>
+        </div>
+    </div>
+
+    {% for category, category_fields in categories.items() %}
+        {% set loop_index = loop.index %}
+        <div class="category">
+            <button class="category-head" type="button" aria-expanded="true"
+                    aria-controls="cat-{{ loop_index }}">
+                <span>{{ category }}
+                    <span class="badge">{{ category_fields | length }}</span>
+                </span>
+                <span class="chev" aria-hidden="true">&#9662;</span>
+            </button>
+            <div class="category-body" id="cat-{{ loop_index }}">
+                {% for field in category_fields %}
+                    {% set entry = values.get(field['id'], {}) %}
+                    <div class="check-item">
+                        {% if field['field_type'] == 'checkbox' %}
+                            <div class="check-row">
+                                <input type="checkbox" id="f{{ field['id'] }}" name="{{ field['id'] }}"
+                                       {% if (entry.get('value') or '') | lower in ['yes', 'on', '1', 'true'] %}checked{% endif %}>
+                                <label class="check-label" for="f{{ field['id'] }}">{{ field['name'] }}</label>
+                            </div>
+                        {% else %}
+                            <label class="check-label" for="f{{ field['id'] }}">{{ field['name'] }}</label>
+                            <div class="check-input">
+                                <input type="{{ 'number' if field['field_type'] == 'number' else 'text' }}"
+                                       id="f{{ field['id'] }}" name="{{ field['id'] }}"
+                                       {% if field['field_type'] == 'number' %}step="any"{% endif %}
+                                       value="{{ entry.get('value', '') }}">
+                            </div>
+                        {% endif %}
+                        <div class="check-comment">
+                            <label class="hint" for="c{{ field['id'] }}">Comment</label>
+                            <textarea id="c{{ field['id'] }}" name="{{ field['id'] }}_comment"
+                                      placeholder="Add a comment...">{{ entry.get('comment', '') }}</textarea>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endfor %}
+
+    <div class="sticky-actions" data-progress>
+        <div style="flex: 1; min-width: 200px;">
+            <div class="small muted" data-progress-label>0 verified</div>
+            <div class="meter"><span style="width: 0%"></span></div>
+        </div>
+        <div class="actions">
+            <a class="btn btn-secondary" href="{{ url_for('pages.index') }}">Back to home</a>
+            <button class="btn" type="submit">Submit checklist</button>
+        </div>
+    </div>
+</form>
+{% endif %}
+{% endblock %}

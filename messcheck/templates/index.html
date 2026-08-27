@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% from "_macros.html" import score_badge, meter, empty_state, records_table %}
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div>
+        <h1>Weekly food safety checks</h1>
+        <p>Record a mess inspection, keep every answer with its comment, and see how
+           each visit scored against the checklist.</p>
+        <div class="hero-actions">
+            <a class="btn" href="{{ url_for('records.new') }}">Start a new check</a>
+            <a class="btn btn-secondary" href="{{ url_for('records.index') }}">Browse records</a>
+        </div>
+    </div>
+
+    <form class="quick-start" method="post" action="{{ url_for('pages.index') }}">
+        <h2>Quick start</h2>
+        <div class="field">
+            <label for="qs-date">Inspection date</label>
+            <input type="date" id="qs-date" name="date" value="{{ today }}" required>
+        </div>
+        <div class="field">
+            <label for="qs-name">Inspector name</label>
+            <input type="text" id="qs-name" name="inspector_name" placeholder="Your name" required>
+        </div>
+        <button class="btn btn-block" type="submit">Open checklist</button>
+    </form>
+</section>
+
+<section class="grid grid-4" aria-label="Summary">
+    <div class="stat">
+        <div class="stat-label">Total records</div>
+        <div class="stat-value num">{{ stats.total_records }}</div>
+        <div class="stat-note">inspections saved</div>
+    </div>
+    <div class="stat">
+        <div class="stat-label">This month</div>
+        <div class="stat-value num">{{ stats.this_month }}</div>
+        <div class="stat-note">checks logged</div>
+    </div>
+    <div class="stat">
+        <div class="stat-label">Checklist fields</div>
+        <div class="stat-value num">{{ stats.total_fields }}</div>
+        <div class="stat-note">across {{ stats.categories }} categories</div>
+    </div>
+    <div class="stat">
+        <div class="stat-label">Latest score</div>
+        <div class="stat-value num">
+            {% if stats.latest_score is not none %}{{ stats.latest_score }}%{% else %}&mdash;{% endif %}
+        </div>
+        {% if stats.latest %}
+            {{ meter(stats.latest_score) }}
+            <div class="stat-note">{{ stats.latest['date'] | pretty_date }} · {{ stats.latest['inspector_name'] }}</div>
+        {% else %}
+            <div class="stat-note">no inspections yet</div>
+        {% endif %}
+    </div>
+</section>
+
+<section class="card" style="margin-top: 24px;">
+    <div class="card-head">
+        <h2>Recent records</h2>
+        <a class="btn btn-sm btn-secondary" href="{{ url_for('records.index') }}">View all</a>
+    </div>
+    {% if records %}
+        {{ records_table(records, scores) }}
+    {% else %}
+        {{ empty_state('&#128203;' | safe, 'No records yet',
+                       'Submit your first checklist and it will show up here.',
+                       url_for('records.new'), 'Start a new check') }}
+    {% endif %}
+</section>
+{% endblock %}

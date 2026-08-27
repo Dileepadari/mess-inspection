@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Edit field{% endblock %}
+
+{% block content %}
+<div class="page-head">
+    <div>
+        <h1>Edit field</h1>
+        <p>Renaming a field keeps every answer already recorded against it.</p>
+    </div>
+    <div class="page-head-actions">
+        <a class="btn btn-secondary" href="{{ url_for('fields.index', tab='list') }}">All fields</a>
+    </div>
+</div>
+
+<div class="card">
+    <form method="post" novalidate>
+        <div class="field">
+            <label for="name">Field name</label>
+            <input type="text" id="name" name="name" value="{{ field['name'] }}" required>
+        </div>
+        <div class="form-row">
+            <div class="field">
+                <label for="type">Field type</label>
+                <select id="type" name="type" required>
+                    {% for value, label in field_types %}
+                        <option value="{{ value }}" {% if field['field_type'] == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="field">
+                <label for="category">Category</label>
+                <input type="text" id="category" name="category" list="category-options"
+                       value="{{ field['category'] }}" required>
+                <datalist id="category-options">
+                    {% for category in categories %}<option value="{{ category }}"></option>{% endfor %}
+                </datalist>
+            </div>
+        </div>
+        <div class="form-actions">
+            <button class="btn" type="submit">Save changes</button>
+            <a class="btn btn-secondary" href="{{ url_for('fields.index', tab='list') }}">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
