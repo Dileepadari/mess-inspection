@@ -811,9 +811,12 @@ tbody tr:hover { background: var(--surface-2); }
     .page-head { align-items: flex-start; }
     .page-head-actions { width: 100%; }
     .page-head-actions .btn { flex: 1; }
-    .sticky-actions { flex-direction: column; align-items: stretch; }
-    .sticky-actions .actions { flex-direction: column; }
-    .sticky-actions .btn { width: 100%; }
+    /* The progress line goes above the buttons, but the two buttons stay side by
+       side: stacked, this bar eats a third of a phone screen and it is pinned to
+       the bottom of every scroll position on the form. */
+    .sticky-actions { flex-direction: column; align-items: stretch; gap: 8px; padding: 10px 14px; }
+    .sticky-actions .actions { flex-direction: row; }
+    .sticky-actions .btn { flex: 1; width: auto; }
     .form-actions .btn { flex: 1; }
     .filters { grid-template-columns: 1fr; }
 

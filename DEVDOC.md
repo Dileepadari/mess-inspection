@@ -16,10 +16,14 @@ and setup/deployment. For what the app does from a user's point of view, see
 - [Theming](#theming)
 - [Front-end behaviour](#front-end-behaviour)
 - [Testing](#testing)
+- [Demo data](#demo-data)
 - [Environment variables](#environment-variables)
 - [Local development](#local-development)
+- [Continuous integration](#continuous-integration)
+- [Documentation and screenshots](#documentation-and-screenshots)
 - [Deployment](#deployment)
 - [Known constraints and gotchas](#known-constraints-and-gotchas)
+- [Contributors](#contributors)
 
 ## Tech stack
 
@@ -256,7 +260,7 @@ absent - the same file loads on every page.
 .venv/bin/python -m pytest tests -q
 ```
 
-32 tests, all through Flask's test client against a temporary SQLite file per test, so they
+35 tests, all through Flask's test client against a temporary SQLite file per test, so they
 never touch the working database. `tests/test_app.py` covers page rendering, the create /
 edit / delete flows, filtering, CSV export, field CRUD and reordering, and scoring.
 `tests/test_migration.py` builds a database in the original schema and asserts the upgrade.
@@ -266,7 +270,36 @@ recognisable: unticking a box on edit, no duplicate answer rows after repeated s
 delete name check, the edit page preselecting the right category, and field deletion removing
 its answers.
 
+`tests/test_seed_demo.py` covers the demo seeder: every visit answers every field (or the
+compliance score on the records list is computed against a different denominator per row),
+the output is deterministic, and a second run refuses to double the records up.
+
 Not covered: the JavaScript (no browser harness), and concurrent writes.
+
+## Demo data
+
+`flask --app app seed-demo` writes a run of inspection visits into an empty database:
+
+```bash
+flask --app app seed-demo               # 14 weekly visits
+flask --app app seed-demo --visits 30
+```
+
+It exists because a fresh install has the checklist but no records, so Records, a record's
+detail page and every score on the home page are empty - which is correct and shows nothing.
+The generator lives in `messcheck/db.py` beside the schema it writes against.
+
+Three things about the data are deliberate rather than incidental:
+
+- **Scores are uneven and trend upward.** A list where every visit scored the same tells you
+  nothing about whether the colour coding, the sorting or the score itself works.
+- **Comments land on about one field in six.** Enough for the detail page to show what a
+  comment looks like in context, few enough that the page stays readable.
+- **It is deterministic** (fixed PRNG seed), so a re-seed produces the same visits and a
+  screenshot taken from it stays true.
+
+It refuses to run against a database that already has records, so it cannot silently double
+someone's data.
 
 ## Environment variables
 
@@ -304,6 +337,32 @@ Run the tests with `.venv/bin/python -m pytest tests -q`.
 
 Templates are only auto-reloaded when debug is on. `FLASK_DEBUG=0` caches them, so a template
 edit will not appear until you restart - this costs time if you forget.
+
+## Continuous integration
+
+`.github/workflows/ci.yml`, three jobs:
+
+- **tests** - the suite on Python 3.11, 3.12 and 3.13.
+- **smoke** - `init-db`, `seed-demo`, then boot the real app and fetch the home page, the
+  records list, a record and the checklist. The schema and the seeder are exactly what a unit
+  test can pass without.
+- **audit** - `pip-audit --strict -r requirements.txt`.
+
+## Documentation and screenshots
+
+`README.md` is the dark-mode page and `README-light.md` its light twin. GitHub has no theme
+toggle, so the toggle is a pair of pages linking to each other; the light page is
+**generated**, never hand-edited, and CI fails on a diff:
+
+```bash
+python scripts/build_light_readme.py
+```
+
+Screenshots live under `docs/screenshots/{dark,light}` and
+`docs/screenshots/responsive/{dark,light}`, one file per screen with the same name in both
+themes, so swapping the path is all that separates the two pages. They are real viewport
+renders against the demo data (1280x900 desktop, 390x844 phone, 820x1180 tablet), captured
+by forcing `data-theme` on the root element - the same attribute the in-app toggle sets.
 
 ## Deployment
 
@@ -343,3 +402,13 @@ Do not run `app.py` in production; it starts Flask's development server.
 - **Template caching with debug off.** See [local development](#local-development).
 - **The `time` column is `HH:MM`.** A migrated database may hold `HH:MM:SS`; the
   `pretty_time` filter accepts both, and `_read_form` truncates input to five characters.
+
+---
+
+## Contributors
+
+- **Dileep Adari** ([@Dileepadari](https://github.com/Dileepadari)) - author and maintainer.
+
+Issues and pull requests:
+[github.com/Dileepadari/MessCheck](https://github.com/Dileepadari/MessCheck). Run
+`python -m pytest -q` before opening one, and keep commit messages to a single line.

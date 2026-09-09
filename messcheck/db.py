@@ -200,6 +200,100 @@ def init_db_command():
     click.echo(f"Initialised {current_app.config['DATABASE']}")
 
 
+#: Inspectors and the shape of a run of visits, for `seed-demo`. The scores are
+#: deliberately uneven and trend upwards: a records list where every visit scored
+#: the same tells you nothing about whether the screen is doing its job.
+DEMO_INSPECTORS = ("R. Anand", "Kavya Menon", "S. Prasad", "Meera Iyer")
+DEMO_NOTES = (
+    "Follow up on the chimney filters before the next visit.",
+    "Kitchen was mid-service; recheck storage after closing.",
+    "Everything raised last week has been closed out.",
+    "Waste segregation still inconsistent at the back door.",
+    "",
+)
+DEMO_COMMENTS = (
+    "Two staff without hairnets at the counter.",
+    "Sanitiser refilled during the visit.",
+    "Rear drain still slow to clear.",
+    "New labels in use since Monday.",
+    "Checked with the supervisor, corrected on the spot.",
+)
+
+
+def seed_demo(db=None, visits=14):
+    """Write a run of inspection visits, so the records screens have real data.
+
+    Deterministic (fixed PRNG seed), so a re-seed produces the same book of
+    visits and a screenshot taken from it stays true. Refuses to run against a
+    database that already has records rather than doubling them up.
+    """
+    import random
+    from datetime import date as _date, time as _time, timedelta
+
+    db = db or get_db()
+    init_db(db)
+
+    existing = db.execute("SELECT COUNT(*) AS n FROM checklist").fetchone()[0]
+    if existing:
+        return 0
+
+    rng = random.Random(20260909)
+    fields = db.execute(
+        "SELECT id, field_type FROM fields ORDER BY position, id"
+    ).fetchall()
+    today = _date.today()
+
+    for visit in range(visits):
+        # Roughly weekly, oldest first, so the list reads as a history.
+        when = today - timedelta(days=(visits - 1 - visit) * 7 + rng.randint(0, 2))
+        hour = rng.choice((9, 11, 14, 16))
+        quality = 0.55 + 0.03 * visit + rng.uniform(-0.12, 0.12)
+        cursor = db.execute(
+            "INSERT INTO checklist (date, time, inspector_name, notes, created_at, updated_at)"
+            " VALUES (?, ?, ?, ?, ?, ?)",
+            (
+                when.isoformat(),
+                _time(hour, rng.choice((0, 15, 30))).strftime("%H:%M"),
+                DEMO_INSPECTORS[visit % len(DEMO_INSPECTORS)],
+                rng.choice(DEMO_NOTES),
+                f"{when.isoformat()}T{hour:02d}:00:00",
+                f"{when.isoformat()}T{hour:02d}:00:00",
+            ),
+        )
+        checklist_id = cursor.lastrowid
+
+        for field in fields:
+            if field["field_type"] == "checkbox":
+                value = "on" if rng.random() < min(quality, 0.97) else ""
+            elif field["field_type"] == "number":
+                value = str(rng.choice((2, 3, 4, 5)))
+            else:
+                value = (when - timedelta(days=rng.randint(3, 25))).isoformat()
+            # A comment on roughly one field in six: enough that the detail view
+            # shows what comments look like, few enough to stay readable.
+            comment = rng.choice(DEMO_COMMENTS) if rng.random() < 0.16 else ""
+            db.execute(
+                "INSERT INTO checklist_fields (checklist_id, field_id, value, comment)"
+                " VALUES (?, ?, ?, ?)",
+                (checklist_id, field["id"], value, comment),
+            )
+
+    db.commit()
+    return visits
+
+
+@click.command("seed-demo")
+@click.option("--visits", default=14, show_default=True, help="How many visits to write.")
+def seed_demo_command(visits):
+    """Flask CLI: fill an empty database with a run of demo inspection visits."""
+    written = seed_demo(visits=visits)
+    if written:
+        click.echo(f"Wrote {written} demo visits to {current_app.config['DATABASE']}")
+    else:
+        click.echo("Database already has records; nothing written.")
+
+
 def init_app(app):
     app.teardown_appcontext(close_db)
     app.cli.add_command(init_db_command)
+    app.cli.add_command(seed_demo_command)

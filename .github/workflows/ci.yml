@@ -1,0 +1,87 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    name: Tests on Python ${{ matrix.python }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - run: python -m pytest -q
+
+  smoke:
+    name: Initialise, seed and serve
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      # The database schema and the demo seeder are the two things a unit test
+      # can pass without: this boots the real app against a real SQLite file and
+      # fetches the pages that read it.
+      - name: The app serves its own seeded data
+        run: |
+          flask --app app init-db
+          flask --app app seed-demo
+          flask --app app run --host 127.0.0.1 --port 5000 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:5000/ >/dev/null 2>&1; then
+              curl -fsS http://127.0.0.1:5000/records > /dev/null
+              curl -fsS http://127.0.0.1:5000/records/1 > /dev/null
+              curl -fsS http://127.0.0.1:5000/checklist > /dev/null
+              echo "app served home, records, a record and the checklist"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "app did not come up within 30s"
+          exit 1
+
+      - name: The light README matches its source
+        run: |
+          python scripts/build_light_readme.py
+          git diff --exit-code README-light.md
+
+  audit:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install pip-audit
+
+      # The declared dependencies rather than the environment: an advisory
+      # against the runner image's own pip is not something this repository can
+      # act on.
+      - run: pip-audit --strict -r requirements.txt

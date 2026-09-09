@@ -1,3 +1,5 @@
+<!-- Generated from README.md by scripts/build_light_readme.py. Do not edit by hand. -->
+
 <div align="center">
 
 <picture>
@@ -21,7 +23,7 @@
 
 **[Developer documentation](./DEVDOC.md)** &middot; [Screenshots](#screenshots) &middot; [Features](#features) &middot; [Getting started](#getting-started)
 
-<p><b>Dark mode</b> &middot; <a href="./README-light.md">View this page in light mode</a></p>
+<p><b>Light mode</b> &middot; <a href="./README.md">View this page in dark mode</a></p>
 
 </div>
 
@@ -67,35 +69,35 @@ in a judgement call is a score nobody trusts.
 ## Screenshots
 
 Real 1280x900 viewport renders against the demo data that `flask --app app seed-demo`
-writes. This page shows **dark mode**; the same gallery in light mode is at
-**[README-light.md](./README-light.md)**.
+writes. This page shows **light mode**; the same gallery in dark mode is at
+**[README.md](./README.md)**.
 
 <table>
   <tr>
     <td width="33%" valign="top">
-      <img src="./docs/screenshots/dark/home.png" alt="Home page with quick start, four stat tiles and recent records" loading="lazy">
+      <img src="./docs/screenshots/light/home.png" alt="Home page with quick start, four stat tiles and recent records" loading="lazy">
       <p align="center"><b>Home</b><br><sub>Start a check, or see how the last one scored.</sub></p>
     </td>
     <td width="33%" valign="top">
-      <img src="./docs/screenshots/dark/checklist.png" alt="The inspection form with categories and a comment box on every field" loading="lazy">
+      <img src="./docs/screenshots/light/checklist.png" alt="The inspection form with categories and a comment box on every field" loading="lazy">
       <p align="center"><b>New inspection</b><br><sub>Grouped by category, with a live progress bar.</sub></p>
     </td>
     <td width="33%" valign="top">
-      <img src="./docs/screenshots/dark/records.png" alt="Records list with compliance scores, inspector search and a date filter" loading="lazy">
+      <img src="./docs/screenshots/light/records.png" alt="Records list with compliance scores, inspector search and a date filter" loading="lazy">
       <p align="center"><b>Records</b><br><sub>Every visit, scored, searchable, exportable as CSV.</sub></p>
     </td>
   </tr>
   <tr>
     <td width="33%" valign="top">
-      <img src="./docs/screenshots/dark/record-detail.png" alt="A single record showing its summary and the answers per category" loading="lazy">
+      <img src="./docs/screenshots/light/record-detail.png" alt="A single record showing its summary and the answers per category" loading="lazy">
       <p align="center"><b>A record</b><br><sub>What was verified, what was said, and the score.</sub></p>
     </td>
     <td width="33%" valign="top">
-      <img src="./docs/screenshots/dark/fields.png" alt="Field management with the new field form and guidance on field types" loading="lazy">
+      <img src="./docs/screenshots/light/fields.png" alt="Field management with the new field form and guidance on field types" loading="lazy">
       <p align="center"><b>Fields</b><br><sub>The checklist is data: add, retype, reorder, retire.</sub></p>
     </td>
     <td width="33%" valign="top">
-      <img src="./docs/screenshots/dark/about.png" alt="The about page explaining how a check works and what the score means" loading="lazy">
+      <img src="./docs/screenshots/light/about.png" alt="The about page explaining how a check works and what the score means" loading="lazy">
       <p align="center"><b>About</b><br><sub>How a check works, and what the score does not count.</sub></p>
     </td>
   </tr>
@@ -109,15 +111,15 @@ Each of these is a single render at that exact viewport, not a scaled-down deskt
 <table>
   <tr>
     <td width="28%" valign="top">
-      <img src="./docs/screenshots/responsive/dark/phone-home.png" alt="Home page on a 390x844 phone viewport" loading="lazy">
+      <img src="./docs/screenshots/responsive/light/phone-home.png" alt="Home page on a 390x844 phone viewport" loading="lazy">
       <p align="center"><b>Phone, 390x844</b><br><sub>The nav collapses to a drawer; quick start stays first.</sub></p>
     </td>
     <td width="28%" valign="top">
-      <img src="./docs/screenshots/responsive/dark/phone-checklist.png" alt="The inspection form on a 390x844 phone viewport" loading="lazy">
+      <img src="./docs/screenshots/responsive/light/phone-checklist.png" alt="The inspection form on a 390x844 phone viewport" loading="lazy">
       <p align="center"><b>Phone, the form</b><br><sub>Progress and both buttons pinned to the bottom.</sub></p>
     </td>
     <td width="44%" valign="top">
-      <img src="./docs/screenshots/responsive/dark/tablet-records.png" alt="The records list on an 820x1180 tablet viewport" loading="lazy">
+      <img src="./docs/screenshots/responsive/light/tablet-records.png" alt="The records list on an 820x1180 tablet viewport" loading="lazy">
       <p align="center"><b>Tablet, 820x1180</b><br><sub>The record table keeps its columns; filters go two-up.</sub></p>
     </td>
   </tr>
